@@ -32,8 +32,8 @@ def parse_arguments():
 
 
 class InstaGBot:
-    def __init__(self, gsheet, authkey, settings='settings'):
-        self.gsheet = gsheet
+    def __init__(self, spreadsheet, authkey, settings='settings'):
+        self.spreadsheet = spreadsheet
         self.authkey = authkey
         self.settings = settings
         self.client = None
@@ -43,11 +43,11 @@ class InstaGBot:
 
     def sheet(self, worksheet):
         if args.sheet:
-            document = self.client.open(self.gsheet)
+            document = self.client.open(self.spreadsheet)
         elif args.sheet_key:
-            document = self.client.open_by_key(self.gsheet)
+            document = self.client.open_by_key(self.spreadsheet)
         elif args.sheet_url:
-            document = self.client.open_by_url()
+            document = self.client.open_by_url(self.spreadsheet)
         else:
             document = None
             raise()
@@ -69,23 +69,20 @@ class InstaGBot:
         values = wks.get_all_values()
         return values
 
-    def settings_bool(self, key):
+    def settings_get_value(self, key):
         wks = self.sheet(self.settings)
         cell = wks.find(key)
-        values = bool(wks.cell(cell.row, cell.col + 1).value)
-        return values
+        value = wks.cell(cell.row, cell.col + 1).value
+        return value
+
+    def settings_bool(self, key):
+        return bool(self.settings_get_value(key))
 
     def settings_int(self, key):
-        wks = self.sheet(self.settings)
-        cell = wks.find(key)
-        values = int(wks.cell(cell.row, cell.col + 1).value)
-        return values
+        return int(self.settings_get_value(key))
 
     def settings_text(self, key):
-        wks = self.sheet(self.settings)
-        cell = wks.find(key)
-        values = wks.cell(cell.row, cell.col + 1).value
-        return values
+        return self.settings_get_value(key)
 
 
 if __name__ == '__main__':
@@ -162,6 +159,8 @@ if __name__ == '__main__':
     # set_delimit_commenting
 
     # set_simulation
+
+    ip.set_simulation(enabled=False)
 
     # set_dont_unfollow_active_users
 
@@ -266,7 +265,5 @@ if __name__ == '__main__':
     # pick_mutual_following
 
     # join_pods
-
-    ip.run_time()
 
     ip.end()
