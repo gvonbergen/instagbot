@@ -27,18 +27,21 @@ def parse_arguments():
     group.add_argument('--sheet-url')
     parser.add_argument('--workspace', default='.')
     parser.add_argument('--like-locations')
+    parser.add_argument('--interact-followers')
     return parser.parse_args()
 
 
 class InstaGBot:
-    def __init__(self, gsheet, authkey):
+    def __init__(self, gsheet, authkey, settings='settings'):
         self.gsheet = gsheet
         self.authkey = authkey
+        self.settings = settings
+        self.client = None
 
     def authorize(self):
         self.client = gspread_auth(self.authkey)
 
-    def worksheet(self, worksheet):
+    def sheet(self, worksheet):
         if args.sheet:
             document = self.client.open(self.gsheet)
         elif args.sheet_key:
@@ -52,28 +55,34 @@ class InstaGBot:
         return wks
 
     def get_rows(self, worksheet, row=1):
-        wks = self.worksheet(worksheet)
+        wks = self.sheet(worksheet)
         values = wks.row_values(row)
         return values
 
     def get_cols(self, worksheet, col=1):
-        wks = self.worksheet(worksheet)
+        wks = self.sheet(worksheet)
         values = wks.col_values(col)
         return values
 
     def get_all_values(self, worksheet):
-        wks = self.worksheet(worksheet)
+        wks = self.sheet(worksheet)
         values = wks.get_all_values()
         return values
 
-    def find_value_row_int(self, worksheet, key):
-        wks = self.worksheet(worksheet)
+    def settings_bool(self, key):
+        wks = self.sheet(self.settings)
+        cell = wks.find(key)
+        values = bool(wks.cell(cell.row, cell.col + 1).value)
+        return values
+
+    def settings_int(self, key):
+        wks = self.sheet(self.settings)
         cell = wks.find(key)
         values = int(wks.cell(cell.row, cell.col + 1).value)
         return values
 
-    def find_value_row_text(self, worksheet, key):
-        wks = self.worksheet(worksheet)
+    def settings_text(self, key):
+        wks = self.sheet(self.settings)
         cell = wks.find(key)
         values = wks.cell(cell.row, cell.col + 1).value
         return values
@@ -114,11 +123,19 @@ if __name__ == '__main__':
 
     # set_do_like
 
+    ip.set_do_like(enabled=bot.settings_bool('set_do_like_enabled'),
+                   percentage=bot.settings_int('set_do_like_percentage'))
+
     # set_dont_like
 
     # set_mandatory_words
 
     # set_user_interact
+
+    ip.set_user_interact(amount=bot.settings_int('set_user_interact_amount'),
+                         percentage=bot.settings_int('set_user_interact_percentage'),
+                         randomize=bot.settings_bool('set_user_interact_randomize'),
+                         media=bot.settings_text('set_user_interact_media'))
 
     # set_ignore_users
 
@@ -169,10 +186,11 @@ if __name__ == '__main__':
     # -- Liking -- #
     # like_by_locations
 
-    ip.like_by_locations(locations=bot.get_cols(args.like_locations),
-                         amount=bot.find_value_row_int('settings', 'like_by_locations_amount'),
-                         media=bot.find_value_row_text('settings', 'like_by_locations_media'),
-                         skip_top_posts=True)
+    if args.like_locations:
+        ip.like_by_locations(locations=bot.get_cols(args.like_locations),
+                             amount=bot.settings_int('like_by_locations_amount'),
+                             media=bot.settings_text('like_by_locations_media'),
+                             skip_top_posts=True)
 
     # like_by_tags
 
@@ -191,6 +209,13 @@ if __name__ == '__main__':
     # interact_by_users_tagged_posts
 
     # interact_user_followers
+    if args.interact_followers:
+        """
+        Functions needs set_do_* and set_user_interact
+        """
+        ip.interact_user_followers(bot.get_cols(args.interact_followers),
+                                   amount=bot.settings_int('interact_user_followers_amount'),
+                                   randomize=bot.settings_bool('interact_user_followers_randomize'))
 
     # interact_user_following
 
