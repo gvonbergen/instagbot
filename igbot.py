@@ -167,6 +167,11 @@ if __name__ == '__main__':
     # set_blacklist
 
     # set_quota_supervisor
+    ip.set_quota_supervisor(enabled=bot.settings_bool('set_quota_supervisor_enabled'),
+                            peak_likes=(bot.settings_int('set_quota_supervisor_likes_hour'),
+                                        bot.settings_int('set_quota_supervisor_likes_day')),
+                            sleep_after=[bot.settings_text('set_quota_supervisor_sleepafter')],
+                            stochastic_flow=bot.settings_bool('set_quota_supervisor_stochflow'))
 
     # set_do_reply_to_comments
 
