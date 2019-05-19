@@ -27,6 +27,7 @@ def parse_arguments():
     group.add_argument('--sheet-url')
     parser.add_argument('--workspace', default='.')
     parser.add_argument('--like-locations')
+    parser.add_argument('--like-users')
     parser.add_argument('--interact-followers')
     return parser.parse_args()
 
@@ -200,6 +201,12 @@ if __name__ == '__main__':
     # like_by_tags
 
     # like_by_users
+
+    if args.like_users:
+        ip.like_by_users(usernames=bot.get_cols(args.like_users),
+                         amount=bot.settings_int('like_by_users_amount'),
+                         randomize=True,
+                         media=None)
 
     # like_from_image
 
