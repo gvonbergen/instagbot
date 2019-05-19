@@ -106,7 +106,8 @@ if __name__ == '__main__':
     set_workspace(path=args.workspace)
 
     ip = InstaPy(username=args.user,
-                 password=args.password)
+                 password=args.password,
+                 headless_browser=True)
 
     # set_sleep_reduce
 
