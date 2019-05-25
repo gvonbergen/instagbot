@@ -64,7 +64,8 @@ class InstaGBot:
     def get_cols(self, worksheet, col=1):
         wks = self.sheet(worksheet)
         values = wks.col_values(col)
-        return random.shuffle(values)
+        random.shuffle(values)
+        return values
 
     def get_all_values(self, worksheet):
         wks = self.sheet(worksheet)
