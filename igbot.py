@@ -207,8 +207,8 @@ if __name__ == '__main__':
     if args.like_users:
         ip.like_by_users(usernames=bot.get_cols(args.like_users),
                          amount=bot.settings_int('like_by_users_amount'),
-                         randomize=True,
-                         media=None)
+                         randomize=bot.settings_bool('like_by_users_randomize'),
+                         media=bot.settings_text('like_by_users_media'))
 
     # like_from_image
 
