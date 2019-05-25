@@ -4,6 +4,7 @@ This is the main runner for igbot
 
 import argparse
 import gspread
+import random
 
 from instapy import InstaPy
 from instapy import set_workspace
@@ -63,7 +64,7 @@ class InstaGBot:
     def get_cols(self, worksheet, col=1):
         wks = self.sheet(worksheet)
         values = wks.col_values(col)
-        return values
+        return random.shuffle(values)
 
     def get_all_values(self, worksheet):
         wks = self.sheet(worksheet)
