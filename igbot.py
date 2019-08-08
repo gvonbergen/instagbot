@@ -34,22 +34,19 @@ def parse_arguments():
 
 
 class InstaGBot:
-    def __init__(self, spreadsheet, authkey, settings='settings'):
-        self.spreadsheet = spreadsheet
-        self.authkey = authkey
+    def __init__(self, args, settings='settings'):
+        self.spreadsheet = args.sheet or args.sheet_key or args.sheet_url
+        self.gclient = gspread_auth(args.authkey)
         self.settings = settings
-        self.client = None
-
-    def authorize(self):
-        self.client = gspread_auth(self.authkey)
+        self.ip = None
 
     def sheet(self, worksheet):
         if args.sheet:
-            document = self.client.open(self.spreadsheet)
+            document = self.gclient.open(self.spreadsheet)
         elif args.sheet_key:
-            document = self.client.open_by_key(self.spreadsheet)
+            document = self.gclient.open_by_key(self.spreadsheet)
         elif args.sheet_url:
-            document = self.client.open_by_url(self.spreadsheet)
+            document = self.gclient.open_by_url(self.spreadsheet)
         else:
             document = None
             raise()
@@ -87,128 +84,112 @@ class InstaGBot:
     def settings_text(self, key):
         return self.settings_get_value(key)
 
+    def setup(self, args):
+        set_workspace(path=args.workspace)
+        self.ip = InstaPy(username=args.user,
+                          password=args.password,
+                          headless_browser=True)
+        # set_sleep_reduce
+
+        # set_action_delays
+
+        # set_do_comment
+
+        # set_comments
+
+        # set_do_follow
+
+        # set_do_like
+        self.ip.set_do_like(enabled=bot.settings_bool('set_do_like_enabled'),
+                            percentage=bot.settings_int('set_do_like_percentage'))
+
+        # set_dont_like
+
+        # set_mandatory_words
+
+        # set_user_interact
+        self.ip.set_user_interact(amount=bot.settings_int('set_user_interact_amount'),
+                                  percentage=bot.settings_int('set_user_interact_percentage'),
+                                  randomize=bot.settings_bool('set_user_interact_randomize'),
+                                  media=bot.settings_text('set_user_interact_media'))
+
+        # set_ignore_users
+
+        # set_ignore_if_contains
+
+        # set_dont_include
+
+        # set_use_clarifai
+
+        # set_smart_hashtags
+
+        # set_smart_location_hashtags
+
+        # set_mandatory_language
+
+        # clarifai_check_img_for
+
+        # set_relationship_bounds
+
+        # set_skip_users
+
+        # set_delimit_liking
+
+        # set_delimit_commenting
+
+        # set_simulation
+        self.ip.set_simulation(enabled=False)
+
+        # set_dont_unfollow_active_users
+
+        # set_blacklist
+        self.ip.set_quota_supervisor(enabled=bot.settings_bool('set_quota_supervisor_enabled'),
+                                     peak_likes=(bot.settings_int('set_quota_supervisor_likes_hour'),
+                                                 bot.settings_int('set_quota_supervisor_likes_day')),
+                                     sleep_after=[bot.settings_text('set_quota_supervisor_sleepafter')],
+                                     stochastic_flow=bot.settings_bool('set_quota_supervisor_stochflow'))
+
+        # set_do_reply_to_comments
+
+        # set_comment_replies
+
+        # set_use_meaningcloud
+
+        # set_use_yandex
 
 if __name__ == '__main__':
 
     args = parse_arguments()
     print(args)
 
-    if args.sheet:
-        bot = InstaGBot(args.sheet, args.authkey)
-    elif args.sheet_key:
-        bot = InstaGBot(args.sheet_key, args.authkey)
-    elif args.sheet_url:
-        bot = InstaGBot(args.sheet_url, args.authkey)
-    else:
-        raise()
+    bot = InstaGBot(args)
 
-    bot.authorize()
-
-    # -- SETTINGS -- #
-
-    set_workspace(path=args.workspace)
-
-    ip = InstaPy(username=args.user,
-                 password=args.password,
-                 headless_browser=True)
-
-    # set_sleep_reduce
-
-    # set_action_delays
-
-    # set_do_comment
-
-    # set_comments
-
-    # set_do_follow
-
-    # set_do_like
-
-    ip.set_do_like(enabled=bot.settings_bool('set_do_like_enabled'),
-                   percentage=bot.settings_int('set_do_like_percentage'))
-
-    # set_dont_like
-
-    # set_mandatory_words
-
-    # set_user_interact
-
-    ip.set_user_interact(amount=bot.settings_int('set_user_interact_amount'),
-                         percentage=bot.settings_int('set_user_interact_percentage'),
-                         randomize=bot.settings_bool('set_user_interact_randomize'),
-                         media=bot.settings_text('set_user_interact_media'))
-
-    # set_ignore_users
-
-    # set_ignore_if_contains
-
-    # set_dont_include
-
-    # set_use_clarifai
-
-    # set_smart_hashtags
-
-    # set_smart_location_hashtags
-
-    # set_mandatory_language
-
-    # clarifai_check_img_for
-
-    # set_relationship_bounds
-
-    # set_skip_users
-
-    # set_delimit_liking
-
-    # set_delimit_commenting
-
-    # set_simulation
-
-    ip.set_simulation(enabled=False)
-
-    # set_dont_unfollow_active_users
-
-    # set_blacklist
-
-    # set_quota_supervisor
-    ip.set_quota_supervisor(enabled=bot.settings_bool('set_quota_supervisor_enabled'),
-                            peak_likes=(bot.settings_int('set_quota_supervisor_likes_hour'),
-                                        bot.settings_int('set_quota_supervisor_likes_day')),
-                            sleep_after=[bot.settings_text('set_quota_supervisor_sleepafter')],
-                            stochastic_flow=bot.settings_bool('set_quota_supervisor_stochflow'))
-
-    # set_do_reply_to_comments
-
-    # set_comment_replies
-
-    # set_use_meaningcloud
-
-    # set_use_yandex
+    bot.setup(args)
 
     # ---------------- #
     # -- PROCESSING -- #
     # ---------------- #
 
-    ip.login()
+    bot.ip.login()
 
     # -- Liking -- #
     # like_by_locations
 
     if args.like_locations:
-        ip.like_by_locations(locations=bot.get_cols(args.like_locations),
-                             amount=bot.settings_int('like_by_locations_amount'),
-                             media=bot.settings_text('like_by_locations_media'),
-                             skip_top_posts=True)
+        bot.ip.like_by_locations(locations=bot.get_cols(args.like_locations),
+                                 amount=bot.settings_int('like_by_locations_amount'),
+                                 media=bot.settings_text('like_by_locations_media'),
+                                 skip_top_posts=True)
 
     # like_by_tags
 
     # like_by_users
 
     if args.like_users:
-        ip.like_by_users(usernames=bot.get_cols(args.like_users),
-                         amount=bot.settings_int('like_by_users_amount'),
-                         randomize=bot.settings_bool('like_by_users_randomize'),
-                         media=bot.settings_text('like_by_users_media'))
+        bot.ip.like_by_users(usernames=bot.get_cols(args.like_users),
+                             amount=bot.settings_int('like_by_users_amount'),
+                             randomize=bot.settings_bool('like_by_users_randomize'),
+                             media=bot.settings_text('like_by_users_media'))
 
     # like_from_image
 
@@ -227,9 +208,9 @@ if __name__ == '__main__':
         """
         Functions needs set_do_* and set_user_interact
         """
-        ip.interact_user_followers(bot.get_cols(args.interact_followers),
-                                   amount=bot.settings_int('interact_user_followers_amount'),
-                                   randomize=bot.settings_bool('interact_user_followers_randomize'))
+        bot.ip.interact_user_followers(bot.get_cols(args.interact_followers),
+                                       amount=bot.settings_int('interact_user_followers_amount'),
+                                       randomize=bot.settings_bool('interact_user_followers_randomize'))
 
     # interact_user_following
 
@@ -281,4 +262,4 @@ if __name__ == '__main__':
 
     # join_pods
 
-    ip.end()
+    bot.ip.end()
