@@ -3,6 +3,8 @@ This is the main runner for igbot
 """
 
 import argparse
+from typing import Dict
+
 import gspread
 import random
 
@@ -16,6 +18,16 @@ def gspread_auth(key):
     creds = ServiceAccountCredentials.from_json_keyfile_name(key, scope)
     return gspread.authorize(creds)
 
+def serialize_from_string(entry: str, data_type: str) -> (int, str, bool):
+    if data_type == 'int':
+        return int(entry)
+    elif data_type == 'bool':
+        return bool(entry)
+    else: # assume it is already string
+        return entry
+
+def dict_remove_empty_entries(dictionary: Dict) -> Dict:
+    return {k: v for k, v in dictionary.items() if v}
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='GDocs usage for Instapy')
@@ -34,10 +46,11 @@ def parse_arguments():
 
 
 class InstaGBot:
-    def __init__(self, args, settings='settings'):
+    def __init__(self, args, settings=None):
         self.spreadsheet = args.sheet or args.sheet_key or args.sheet_url
         self.gclient = gspread_auth(args.authkey)
-        self.settings = settings
+        self.settings_tab = 'settings' or settings
+        self.settings = self.load_settings(self.settings_tab)
         self.ip = None
 
     def sheet(self, worksheet):
@@ -52,6 +65,17 @@ class InstaGBot:
             raise()
         wks = document.worksheet(worksheet)
         return wks
+
+    def load_settings(self, settings_tab):
+        wks = self.sheet(settings_tab)
+        sheet_entries = wks.get_all_values()
+        settings = {}
+        for entry in sheet_entries[1:]:
+            k = entry[0]
+            v = serialize_from_string(entry[1], entry[2])
+            settings.update({k: v})
+        settings = dict_remove_empty_entries(settings)
+        return settings
 
     def get_rows(self, worksheet, row=1):
         wks = self.sheet(worksheet)
@@ -70,19 +94,10 @@ class InstaGBot:
         return values
 
     def settings_get_value(self, key):
-        wks = self.sheet(self.settings)
+        wks = self.sheet(self.settings_tab)
         cell = wks.find(key)
         value = wks.cell(cell.row, cell.col + 1).value
         return value
-
-    def settings_bool(self, key):
-        return bool(self.settings_get_value(key))
-
-    def settings_int(self, key):
-        return int(self.settings_get_value(key))
-
-    def settings_text(self, key):
-        return self.settings_get_value(key)
 
     def setup(self, args):
         set_workspace(path=args.workspace)
@@ -100,18 +115,18 @@ class InstaGBot:
         # set_do_follow
 
         # set_do_like
-        self.ip.set_do_like(enabled=bot.settings_bool('set_do_like_enabled'),
-                            percentage=bot.settings_int('set_do_like_percentage'))
+        self.ip.set_do_like(enabled=self.settings['set_do_like_enabled'],
+                            percentage=self.settings['set_do_like_percentage'])
 
         # set_dont_like
 
         # set_mandatory_words
 
         # set_user_interact
-        self.ip.set_user_interact(amount=bot.settings_int('set_user_interact_amount'),
-                                  percentage=bot.settings_int('set_user_interact_percentage'),
-                                  randomize=bot.settings_bool('set_user_interact_randomize'),
-                                  media=bot.settings_text('set_user_interact_media'))
+        self.ip.set_user_interact(amount=self.settings['set_user_interact_amount'],
+                                  percentage=self.settings['set_user_interact_percentage'],
+                                  randomize=self.settings['set_user_interact_randomize'],
+                                  media=self.settings['set_user_interact_media'])
 
         # set_ignore_users
 
@@ -143,11 +158,11 @@ class InstaGBot:
         # set_dont_unfollow_active_users
 
         # set_blacklist
-        self.ip.set_quota_supervisor(enabled=bot.settings_bool('set_quota_supervisor_enabled'),
-                                     peak_likes=(bot.settings_int('set_quota_supervisor_likes_hour'),
-                                                 bot.settings_int('set_quota_supervisor_likes_day')),
-                                     sleep_after=[bot.settings_text('set_quota_supervisor_sleepafter')],
-                                     stochastic_flow=bot.settings_bool('set_quota_supervisor_stochflow'))
+        self.ip.set_quota_supervisor(enabled=self.settings['set_quota_supervisor_enabled'],
+                                     peak_likes=(self.settings['set_quota_supervisor_likes_hour'],
+                                                 self.settings['set_quota_supervisor_likes_day']),
+                                     sleep_after=[self.settings['set_quota_supervisor_sleepafter']],
+                                     stochastic_flow=self.settings['set_quota_supervisor_stochflow'])
 
         # set_do_reply_to_comments
 
@@ -166,6 +181,8 @@ if __name__ == '__main__':
 
     bot.setup(args)
 
+    # test = bot.get_all_values('settings_tab')
+
     # ---------------- #
     # -- PROCESSING -- #
     # ---------------- #
@@ -177,8 +194,8 @@ if __name__ == '__main__':
 
     if args.like_locations:
         bot.ip.like_by_locations(locations=bot.get_cols(args.like_locations),
-                                 amount=bot.settings_int('like_by_locations_amount'),
-                                 media=bot.settings_text('like_by_locations_media'),
+                                 amount=bot.settings['like_by_locations_amount'],
+                                 media=bot.settings['like_by_locations_media'],
                                  skip_top_posts=True)
 
     # like_by_tags
@@ -187,9 +204,9 @@ if __name__ == '__main__':
 
     if args.like_users:
         bot.ip.like_by_users(usernames=bot.get_cols(args.like_users),
-                             amount=bot.settings_int('like_by_users_amount'),
-                             randomize=bot.settings_bool('like_by_users_randomize'),
-                             media=bot.settings_text('like_by_users_media'))
+                             amount=bot.settings['like_by_users_amount'],
+                             randomize=bot.settings['like_by_users_randomize'],
+                             media=bot.settings['like_by_users_media'])
 
     # like_from_image
 
@@ -209,8 +226,8 @@ if __name__ == '__main__':
         Functions needs set_do_* and set_user_interact
         """
         bot.ip.interact_user_followers(bot.get_cols(args.interact_followers),
-                                       amount=bot.settings_int('interact_user_followers_amount'),
-                                       randomize=bot.settings_bool('interact_user_followers_randomize'))
+                                       amount=bot.settings['interact_user_followers_amount'],
+                                       randomize=bot.settings['interact_user_followers_randomize'])
 
     # interact_user_following
 
