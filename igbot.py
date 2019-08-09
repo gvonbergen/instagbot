@@ -41,6 +41,7 @@ def parse_arguments():
     parser.add_argument('--workspace', default='.')
     parser.add_argument('--like-locations')
     parser.add_argument('--like-users')
+    parser.add_argument('--like-tags')
     parser.add_argument('--interact-followers')
     return parser.parse_args()
 
@@ -178,10 +179,7 @@ if __name__ == '__main__':
     print(args)
 
     bot = InstaGBot(args)
-
     bot.setup(args)
-
-    # test = bot.get_all_values('settings_tab')
 
     # ---------------- #
     # -- PROCESSING -- #
@@ -191,7 +189,6 @@ if __name__ == '__main__':
 
     # -- Liking -- #
     # like_by_locations
-
     if args.like_locations:
         bot.ip.like_by_locations(locations=bot.get_cols(args.like_locations),
                                  amount=bot.settings['like_by_locations_amount'],
@@ -199,6 +196,15 @@ if __name__ == '__main__':
                                  skip_top_posts=True)
 
     # like_by_tags
+    if args.like_tags:
+        bot.ip.like_by_tags(tags=bot.get_cols(args.like_tags),
+                            amount=bot.settings['like_by_tags_amount'],
+                            skip_top_posts=bot.settings['like_by_tags_skip'],
+                            use_smart_hashtags=bot.settings['like_by_tags_smart_ht'],
+                            use_smart_location_hashtags=bot.settings['like_by_tags_smart_location_ht'],
+                            interact=bot.settings['like_by_tags_interact'],
+                            randomize=bot.settings['like_by_tags_randomize'],
+                            media=bot.settings['like_by_tags_media'])
 
     # like_by_users
 
