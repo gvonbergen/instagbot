@@ -107,7 +107,7 @@ class InstaGBot:
                           headless_browser=True)
         # set_sleep_reduce
 
-        # set_action_delays
+        # set_action_delays / set a custom sleep delay for each action yourself
 
         # set_do_comment
 
@@ -146,6 +146,14 @@ class InstaGBot:
         # clarifai_check_img_for
 
         # set_relationship_bounds
+        self.ip.set_relationship_bounds(enabled=self.settings['set_relationship_bounds_enabled'],
+                                        delimit_by_numbers=self.settings['set_relationship_bounds_delimit_by_numbers'],
+                                        min_posts=self.settings['set_relationship_bounds_min_posts'],
+                                        max_posts=self.settings['set_relationship_bounds_max_posts'],
+                                        max_followers=self.settings['set_relationship_bounds_max_followers'],
+                                        max_following=self.settings['set_relationship_bounds_max_following'],
+                                        min_followers=self.settings['set_relationship_bounds_min_followers'],
+                                        min_following=self.settings['set_relationship_bounds_min_following'])
 
         # set_skip_users
 
