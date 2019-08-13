@@ -204,6 +204,7 @@ if __name__ == '__main__':
                                  skip_top_posts=True)
 
     # like_by_tags
+    bot.gclient.login()
     if args.like_tags:
         bot.ip.like_by_tags(tags=bot.get_cols(args.like_tags),
                             amount=bot.settings['like_by_tags_amount'],
@@ -215,7 +216,7 @@ if __name__ == '__main__':
                             media=bot.settings['like_by_tags_media'])
 
     # like_by_users
-
+    bot.gclient.login()
     if args.like_users:
         bot.ip.like_by_users(usernames=bot.get_cols(args.like_users),
                              amount=bot.settings['like_by_users_amount'],
@@ -235,6 +236,7 @@ if __name__ == '__main__':
     # interact_by_users_tagged_posts
 
     # interact_user_followers
+    bot.gclient.login()
     if args.interact_followers:
         """
         Functions needs set_do_* and set_user_interact
