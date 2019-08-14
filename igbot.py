@@ -42,6 +42,7 @@ def parse_arguments():
     parser.add_argument('--like-locations')
     parser.add_argument('--like-users')
     parser.add_argument('--like-tags')
+    parser.add_argument('--comments')
     parser.add_argument('--interact-followers')
     return parser.parse_args()
 
@@ -109,9 +110,11 @@ class InstaGBot:
 
         # set_action_delays / set a custom sleep delay for each action yourself
 
-        # set_do_comment
-
-        # set_comments
+        # set_do_comment & set_comments
+        if args.comments:
+            self.ip.set_do_comment(enabled=self.settings['set_do_like_enabled'],
+                                   percentage=self.settings['set_do_like_percentage'])
+            self.ip.set_comments(bot.get_cols(args.comments))
 
         # set_do_follow
 
