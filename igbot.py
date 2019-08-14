@@ -44,6 +44,7 @@ def parse_arguments():
     parser.add_argument('--like-tags')
     parser.add_argument('--comments')
     parser.add_argument('--interact-followers')
+    parser.add_argument('--interact-comments')
     return parser.parse_args()
 
 
@@ -112,8 +113,8 @@ class InstaGBot:
 
         # set_do_comment & set_comments
         if args.comments:
-            self.ip.set_do_comment(enabled=self.settings['set_do_like_enabled'],
-                                   percentage=self.settings['set_do_like_percentage'])
+            self.ip.set_do_comment(enabled=self.settings['set_do_comment_enabled'],
+                                   percentage=self.settings['set_do_comment_percentage'])
             self.ip.set_comments(bot.get_cols(args.comments))
 
         # set_do_follow
@@ -207,8 +208,8 @@ if __name__ == '__main__':
                                  skip_top_posts=True)
 
     # like_by_tags
-    bot.gclient.login()
     if args.like_tags:
+        bot.gclient.login()
         bot.ip.like_by_tags(tags=bot.get_cols(args.like_tags),
                             amount=bot.settings['like_by_tags_amount'],
                             skip_top_posts=bot.settings['like_by_tags_skip'],
@@ -219,8 +220,8 @@ if __name__ == '__main__':
                             media=bot.settings['like_by_tags_media'])
 
     # like_by_users
-    bot.gclient.login()
     if args.like_users:
+        bot.gclient.login()
         bot.ip.like_by_users(usernames=bot.get_cols(args.like_users),
                              amount=bot.settings['like_by_users_amount'],
                              randomize=bot.settings['like_by_users_randomize'],
@@ -239,11 +240,11 @@ if __name__ == '__main__':
     # interact_by_users_tagged_posts
 
     # interact_user_followers
-    bot.gclient.login()
     if args.interact_followers:
         """
         Functions needs set_do_* and set_user_interact
         """
+        bot.gclient.login()
         bot.ip.interact_user_followers(bot.get_cols(args.interact_followers),
                                        amount=bot.settings['interact_user_followers_amount'],
                                        randomize=bot.settings['interact_user_followers_randomize'])
@@ -253,6 +254,15 @@ if __name__ == '__main__':
     # interact_by_URL
 
     # interact_by_comments
+    if args.interact_comments:
+        bot.gclient.login()
+        bot.ip.interact_by_comments(usernames=bot.get_cols(args.interact_comments),
+                                    posts_amount=bot.settings['interact_by_comments_posts_amount'],
+                                    comments_per_post=bot.settings['interact_by_comments_comments_per_post'],
+                                    reply=bot.settings['interact_by_comments_reply'],
+                                    interact=bot.settings['interact_by_comments_interact'],
+                                    randomize=bot.settings['interact_by_comments_randomize'],
+                                    media=bot.settings['interact_by_comments_media'])
 
     # -- Commenting -- #
 
