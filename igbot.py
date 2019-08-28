@@ -36,7 +36,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='GDocs usage for Instapy')
     parser.add_argument('-u', '--user', required=True)
     parser.add_argument('-p', '--password', required=True)
-    parser.add_argument('--authkey', required=True)
+    parser.add_argument('--authkey', default='./keys/instapy.json', required=True)
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--sheet')
     group.add_argument('--sheet-key')
