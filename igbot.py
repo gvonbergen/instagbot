@@ -3,6 +3,7 @@ This is the main runner for igbot
 """
 
 import argparse
+import os
 from typing import Dict
 
 import gspread
@@ -26,8 +27,10 @@ def serialize_from_string(entry: str, data_type: str) -> (int, str, bool):
     else: # assume it is already string
         return entry
 
+
 def dict_remove_empty_entries(dictionary: Dict) -> Dict:
     return {k: v for k, v in dictionary.items() if v}
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='GDocs usage for Instapy')
@@ -38,7 +41,7 @@ def parse_arguments():
     group.add_argument('--sheet')
     group.add_argument('--sheet-key')
     group.add_argument('--sheet-url')
-    parser.add_argument('--workspace', default='.')
+    parser.add_argument('--workspace', default=os.getcwd())
     parser.add_argument('--like-locations')
     parser.add_argument('--like-users')
     parser.add_argument('--like-tags')
@@ -106,7 +109,9 @@ class InstaGBot:
         set_workspace(path=args.workspace)
         self.ip = InstaPy(username=args.user,
                           password=args.password,
-                          headless_browser=True)
+                          headless_browser=True
+                          )
+
         # set_sleep_reduce
 
         # set_action_delays / set a custom sleep delay for each action yourself
@@ -172,8 +177,8 @@ class InstaGBot:
 
         # set_blacklist
         self.ip.set_quota_supervisor(enabled=self.settings['set_quota_supervisor_enabled'],
-                                     peak_likes=(self.settings['set_quota_supervisor_likes_hour'],
-                                                 self.settings['set_quota_supervisor_likes_day']),
+                                     peak_likes_daily=self.settings['set_quota_supervisor_likes_hour'],
+                                     peak_likes_hourly=self.settings['set_quota_supervisor_likes_day'],
                                      sleep_after=[self.settings['set_quota_supervisor_sleepafter']],
                                      stochastic_flow=self.settings['set_quota_supervisor_stochflow'])
 
