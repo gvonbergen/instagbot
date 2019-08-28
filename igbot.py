@@ -50,7 +50,7 @@ def parse_arguments():
     parser.add_argument('--comments')
     parser.add_argument('--interact-followers')
     parser.add_argument('--interact-comments')
-    parser.add_argument('--logging', default=('logs2.papertrailapp.com', 24777))
+    parser.add_argument('--logging')
     return parser.parse_args()
 
 
