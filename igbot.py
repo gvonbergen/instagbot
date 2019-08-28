@@ -117,6 +117,7 @@ class InstaGBot:
                           )
 
         # set_sleep_reduce
+        self.ip.set_sleep_reduce(130)
 
         # set_action_delays / set a custom sleep delay for each action yourself
 
