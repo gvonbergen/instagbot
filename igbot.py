@@ -50,7 +50,8 @@ def parse_arguments():
     parser.add_argument('--comments')
     parser.add_argument('--interact-followers')
     parser.add_argument('--interact-comments')
-    parser.add_argument('--logging')
+    parser.add_argument('--pt', type=str)
+    parser.add_argument('--pt-port', type=int)
     return parser.parse_args()
 
 
@@ -198,7 +199,7 @@ if __name__ == '__main__':
     args = parse_arguments()
     print(args)
 
-    syslog = SysLogHandler(address=args.logging)
+    syslog = SysLogHandler(address=(args.pt,args.pt_port))
 
     logger = logging.getLogger('')
     logger.addHandler(syslog)
