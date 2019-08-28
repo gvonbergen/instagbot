@@ -3,7 +3,9 @@ This is the main runner for igbot
 """
 
 import argparse
+import logging
 import os
+from logging.handlers import SysLogHandler
 from typing import Dict
 
 import gspread
@@ -48,6 +50,7 @@ def parse_arguments():
     parser.add_argument('--comments')
     parser.add_argument('--interact-followers')
     parser.add_argument('--interact-comments')
+    parser.add_argument('--logging', default=('logs2.papertrailapp.com', 24777))
     return parser.parse_args()
 
 
@@ -194,6 +197,12 @@ if __name__ == '__main__':
 
     args = parse_arguments()
     print(args)
+
+    syslog = SysLogHandler(address=args.logging)
+
+    logger = logging.getLogger('')
+    logger.addHandler(syslog)
+    logger.setLevel(logging.INFO)
 
     bot = InstaGBot(args)
     bot.setup(args)
